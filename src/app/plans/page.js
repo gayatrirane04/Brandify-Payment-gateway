@@ -1,12 +1,19 @@
 "use client";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Plans() {
-  const { isLoaded } = useUser();
+  const { isLoaded, isSignedIn } = useUser();
   const router = useRouter();
 
-  if (!isLoaded) {
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      router.push('/sign-in');
+    }
+  }, [isLoaded, isSignedIn, router]);
+
+  if (!isLoaded || !isSignedIn) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div>Loading...</div>
@@ -56,14 +63,8 @@ export default function Plans() {
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Payment Gateway Plans</h1>
-          <button
-            onClick={() => router.push("/dashboard")}
-            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-          >
-            Back to Dashboard
-          </button>
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold">Select a Plan to Make a Payment</h1>
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
