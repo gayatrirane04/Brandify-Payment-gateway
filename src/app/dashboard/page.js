@@ -1,18 +1,39 @@
 "use client";
 import { useUser, SignOutButton } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function Dashboard() {
   const { user, isLoaded } = useUser();
-  const router = useRouter();
-
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div>Loading...</div>
-      </div>
-    );
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  
+  const fetchUserData = async () => {
+    try{
+      const response = await fetch('/api/users');
+      const data = await response.json();
+      setUserData(data);
+    }catch(error){
+      console.log("Error fetching user data:", error);
+    }finally{
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+  if (isLoaded && user) {
+    fetchUserData();
   }
+  }, [isLoaded, user]);
+
+  const router = useRouter();
+if (!isLoaded || loading) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div>Loading...</div>
+    </div>
+  );
+}
+
 
   return (
     <div className="min-h-screen p-8">
@@ -30,7 +51,9 @@ export default function Dashboard() {
           <div className="bg-white p-6 rounded shadow-md">
             <h3 className="text-xl font-semibold mb-4">Account Info</h3>
             <p className="text-gray-600 mb-2">Email: {user?.emailAddresses[0]?.emailAddress}</p>
-            <p className="text-gray-600">Status: Active</p>
+           <p className="text-gray-600">
+             Status: {userData?.hasAccess ? "Active" : "Expired"}
+           </p>
           </div>
 
           <div className="bg-white p-6 rounded shadow-md">
@@ -43,10 +66,15 @@ export default function Dashboard() {
             </button>
           </div>
 
-          <div className="bg-white p-6 rounded shadow-md">
-            <h3 className="text-xl font-semibold mb-4">Quick Stats</h3>
-            <p className="text-gray-600 mb-2">Transactions: 0</p>
-            <p className="text-gray-600">Revenue: $0.00</p>
+          <div className="bg-gradient-to-r from-red-600 to-purple-700 p-6 rounded shadow-md text-white">
+            <h3 className="text-xl font-semibold mb-4">🎬 Premium Content</h3>
+            <p className="mb-4">Access exclusive shows and movies</p>
+            <button 
+              onClick={() => router.push('/welcome')}
+              className="bg-white text-red-600 px-4 py-2 rounded hover:bg-gray-100 font-semibold w-full"
+            >
+              Welcome to Show
+            </button>
           </div>
         </div>
 

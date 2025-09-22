@@ -20,12 +20,29 @@ export async function GET(){
 
         if(!dbUser){
             const newUser = {
-                clerkId : userId,
+                clerkId: userId,
                 createdAt: new Date(),
+                name: user.firstName + " " + user.lastName,
+                email: user.emailAddresses[0]?.emailAddress,
+                profileImage: user.imageUrl,
+                isSubscriber: false,
+                subscriptionStart: null,
+                subscriptionEnd: null
             };
             const result = await userCollection.insertOne(newUser);
             dbUser = { ...newUser,_id:result.insertedId};
         }
+
+        // Calculate if user has access (created less than 1 year ago)
+        const oneYearAgo = new Date();
+        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+        const hasAccess = new Date(dbUser.createdAt) > oneYearAgo;
+        
+        console.log("User createdAt:", dbUser.createdAt);
+        console.log("One year ago:", oneYearAgo);
+        console.log("Has access:", hasAccess);
+        
+        dbUser.hasAccess = hasAccess;
 
         return new Response(JSON.stringify(dbUser),{status:200});
 
