@@ -122,4 +122,3 @@ if (loading) {
     </div>
   );
 }
-
