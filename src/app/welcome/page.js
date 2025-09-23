@@ -1,8 +1,27 @@
 "use client";
+import {useState,useEffect} from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 
 export default function Welcome() {
+    const [userData , setUserData] = useState(null);
+const [loading,setLoading] = useState(true);
+
+const fetchUserData = async() => {
+    try{
+       const response = await fetch('/api/users');
+       const data = await response.json();
+       setUserData(data);
+    }catch(error){
+        console.error('Error:',error);
+    }finally{
+           setLoading(false);
+        }
+}
+
+useEffect(() => {
+   fetchUserData();
+},[]);
   const router = useRouter();
   const { user } = useUser();
 
@@ -14,7 +33,33 @@ export default function Welcome() {
     { name: "Romance", image: "💕", color: "bg-pink-500" },
     { name: "Sci-Fi", image: "🚀", color: "bg-blue-600" }
   ];
+  
+  
+if (loading) {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-black text-white">
+      <div>Loading...</div>
+    </div>
+  );
+}
 
+
+  if (!userData?.hasAccess) {
+    return (
+    <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold mb-4">OOPS! 🚫</h1>
+        <p className="text-xl mb-6">Your access has expired</p>
+        <button 
+          onClick={() => router.push('/plans')}
+          className="bg-red-600 px-8 py-3 rounded-lg text-lg font-semibold"
+        >
+          Subscribe Now
+        </button>
+      </div>
+    </div>
+    );
+   }
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Header */}
